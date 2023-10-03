@@ -1,6 +1,9 @@
 """
 Reads in helper script to run SSDraw for multiple PDBs and one multiple sequence alignment
 Then combines images into a single image
+
+Example:
+python run_multiple_pdbs_on_one_msa.py -i example_run.txt -o output
 """
 import sys
 import os
