@@ -1,28 +1,16 @@
 """
-Reads in helper script to run SSDraw for multiple PDBs and one multiple sequence alignment
-Then combines images into a single image
+Reads in helper script to run SSDraw for multiple PDBs and 
+one multiple sequence alignment, then combines images into a composite image
 
-Example:
-python run_multiple_pdbs_on_one_msa.py -i example_run.txt -o output
+To run, run the command 
+"python run_multiple_pdbs_on_one_msa.py --input [input script] --output [output name]"
+An example input script is shown in "example_run.txt"
 """
 import sys
 import os
 from PIL import Image
 import argparse
-
-def combine_images(imgs):
-
-    height = min([img.height for img in imgs])
-    width = min([img.width for img in imgs])
-    pic = Image.new('RGB', (width, height*len(imgs)))
-
-    height_i = 0
-
-    for img in imgs:
-        x = img.crop((0,0,width,height))
-        pic.paste(x, (0, height_i))
-        height_i+=height
-    return pic
+from combine_images import combine_images
 
 
 def get_args():
