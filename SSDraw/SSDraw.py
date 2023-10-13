@@ -376,7 +376,7 @@ def run_dssp(pdb_path, id, chain):
         p = PDBParser()
         structure = p.get_structure(id, pdb_path)
     model = structure[0]
-    dssp = DSSP(model, pdb_path)
+    dssp = DSSP(model, pdb_path, dssp=args.dssp_exe)
     a_key = list(dssp.keys())
     for key in a_key:
         if key[0] == chain:
@@ -652,7 +652,7 @@ def get_args():
     parser.add_argument("-p", "--pdb", help="(required) pdb file")
     parser.add_argument("-n", "--name", help="(required) id of the protein in the alignment file")
     parser.add_argument("-o", "--output", help="(required) name for output file")
-    parser.add_argument("--dssp", default=None, help="secondary structure annotation in DSSP or .horiz format. If this option is not provided, SSDraw will compute secondary structure from the given PDB file with DSSP.")
+    parser.add_argument("--SS", default=None, help="secondary structure annotation in DSSP or .horiz format. If this option is not provided, SSDraw will compute secondary structure from the given PDB file with DSSP.")
     parser.add_argument("--chain_id", default="A", help="chain id to use in pdb. Defaults to chain A.")
     parser.add_argument("--color_map", default=["inferno"], nargs="*", help="color map to use for heat map")
     parser.add_argument("--scoring_file",default=None,help="custom scoring file for alignment")
@@ -665,6 +665,7 @@ def get_args():
     parser.add_argument("--ticks", default=0, type=int, help="set ticks at every nth position")
     parser.add_argument("--start", default=0, type=int)
     parser.add_argument("--end", default=0,type=int)
+    parser.add_argument("--dssp_exe", default='mkdssp', help='The path to your dssp executable. Default: mkdssp')
 
     args = parser.parse_args()
 
@@ -690,7 +691,7 @@ def initialize():
         f = convert2horiz(args.dssp,pdbseq)
     else:
         # run the dssp executable
-        f = run_dssp(args.pdb, id, chain_id) 
+        f = run_dssp(args, args.pdb, id, chain_id) 
 
     nlines = 1
     salign = open(args.fasta).read().splitlines() 
