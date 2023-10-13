@@ -501,7 +501,7 @@ def parse_color(args,seq_wgaps,pdbseq,bfactors,msa,extra_gaps):
                 if len(line.split()) > 0:
                     if line.split()[0].isdigit():
                         scoring_seq += line.split()[1]
-                        bvals_tmp.append(float(line.split()[3]))
+                        bvals_tmp.append(float(line.split()[4]))
 
         else: # read in custom scoring file
             for line in lines:
