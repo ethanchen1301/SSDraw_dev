@@ -26,6 +26,7 @@ If DSSP fails to install, there is a PyTorch implementation of DSSP that you can
 
 #### Alternative to installing DSSP
 
+```
 pip install torch
 pip install pydssp
 pip install nomkl
