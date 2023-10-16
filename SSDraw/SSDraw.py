@@ -366,8 +366,9 @@ def plot_coords(coords_all,mat,sz,CMAP):
         im.set_clip_path(patch)
         
             
-def run_dssp(pdb_path, id, chain):  
+def run_dssp(args, pdb_path, id, chain):  
 
+    dssp_mode = "dssp"
     ss_seq = ""
     aa_seq = ""
     #Suppress Biopython PDBParser warning
@@ -376,15 +377,42 @@ def run_dssp(pdb_path, id, chain):
         p = PDBParser()
         structure = p.get_structure(id, pdb_path)
     model = structure[0]
-    dssp = DSSP(model, pdb_path, dssp=args.dssp_exe)
-    a_key = list(dssp.keys())
-    for key in a_key:
-        if key[0] == chain:
-            aa_seq+=dssp[key][1] 
-            if dssp[key][2] == "-":
-                ss_seq+="C"
-            else:      
-                ss_seq+=dssp[key][2]
+
+    try:
+        dssp = DSSP(model, pdb_path, dssp=args.dssp_exe)
+    except:
+        # use pydssp instead of dssp
+        dssp_mode = "pydssp"
+        import torch
+        import pydssp
+        atom_indices = ['N', 'CA', 'C', 'O']
+        #res_len = len([])
+        
+        for chain in model:
+            if chain.get_id() == args.chain_id:
+                resnum = len([i for i in chain.get_residues()])
+                coords = torch.zeros(resnum, 4, 3)
+                r_idx = 0
+                for residue in chain:
+                    for atom in residue:
+                        if atom.name in atom_indices:
+                            coords[r_idx][atom_indices.index(atom.name)] = torch.from_numpy(atom.coord) 
+                    aa_seq += seq1(residue.get_resname())
+                    r_idx+=1
+        
+        ss_seq = "".join(pydssp.assign(coords, out_type='c3'))
+        ss_seq = ss_seq.replace("-", "C")
+
+
+    if dssp_mode == "dssp":
+        a_key = list(dssp.keys())
+        for key in a_key:
+            if key[0] == chain:
+                aa_seq+=dssp[key][1] 
+                if dssp[key][2] == "-":
+                    ss_seq+="C"
+                else:      
+                    ss_seq+=dssp[key][2]
       
     return [ss_seq,aa_seq]
 
@@ -686,9 +714,9 @@ def initialize():
     # read in amino acid sequence from PDB
     bfactors, pdbseq = read_pdb(id,args)
 
-    if args.dssp:
+    if args.SS:
         # get secondary structure from pre-existing DSSP annotation
-        f = convert2horiz(args.dssp,pdbseq)
+        f = convert2horiz(args.SS,pdbseq)
     else:
         # run the dssp executable
         f = run_dssp(args, args.pdb, id, chain_id) 
