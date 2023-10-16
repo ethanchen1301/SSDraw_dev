@@ -24,9 +24,7 @@ https://github.com/cmbi/dssp.
 
 If you are having trouble installing DSSP, there is a PyTorch implementation of DSSP that you can install as a workaround:
 
-```diff
--Alternative to installing DSSP:
-```
+- ![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) `Alternative to installing dssp`
 ```bash
 pip install torch
 pip install pydssp
