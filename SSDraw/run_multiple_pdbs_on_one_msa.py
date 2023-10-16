@@ -8,6 +8,7 @@ An example input script is shown in "example_run.txt"
 """
 import sys
 import os
+import re
 from PIL import Image
 import argparse
 from combine_images import combine_images
@@ -28,6 +29,7 @@ def get_args():
 def main():
     
     args,parser = get_args()
+    output_file_type = ".png"
 
     ssdraw_params = {
         "FASTA": [],
@@ -62,6 +64,9 @@ def main():
             
             if words[0][0] == "#":
                 continue
+            
+            if bool(re.search("--output_file_type", current_param)):
+                output_file_type = current_param[18:].strip()
 
             if current_param != "" and read_state:
                 ssdraw_params[current_param].append(line.strip())
@@ -89,10 +94,10 @@ def main():
 
         ssdraw_command = "python SSDraw.py -f {:} -p {:} -n {:} -o {:} {:}".format(fasta, pdb, name, output, additional_params)
         os.system(ssdraw_command)
-        imgs.append(Image.open(output+".png"))
+        imgs.append(Image.open(output+"."+output_file_type))
         
-    print("Creating composite image {:}/{:}.png".format(args.output,args.output))
-    combine_images(imgs).save("{:}/{:}.png".format(args.output,args.output))
+    print("Creating composite image {:}/{:}.{:}".format(args.output,args.output, output_file_type))
+    combine_images(imgs).save("{:}/{:}.{:}".format(args.output,args.output,output_file_type))
     
 
 if __name__ == '__main__':
