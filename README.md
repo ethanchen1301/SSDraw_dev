@@ -23,7 +23,7 @@ Alternatively, you can install DSSP either through apt-get (sudo apt-get install
 https://github.com/cmbi/dssp.
 
 If you are having trouble installing DSSP, there is a PyTorch implementation of DSSP that you can install as a workaround:
-### Alternate to installing DSSP:
+#### Alternative to installing DSSP:
 ```bash
 pip install torch
 pip install nomkl
