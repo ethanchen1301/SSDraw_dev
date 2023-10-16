@@ -22,6 +22,14 @@ conda install -c salilab dssp
 Alternatively, you can install DSSP either through apt-get (sudo apt-get install dssp), or you can follow the instructions on their github page to make a local installation: 
 https://github.com/cmbi/dssp.
 
+If you are having trouble installing DSSP, there is a PyTorch implementation of DSSP that you can install as a workaround:
+### Alternate to installing DSSP:
+```bash
+pip install torch
+pip install nomkl
+pip install pydssp
+```
+
 ## Instructions
 SSDraw requires 4 arguments:
 1. --fasta: the file name sequence or alignment file in fasta format.
