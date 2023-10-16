@@ -22,10 +22,10 @@ conda install -c salilab dssp
 Alternatively, you can install DSSP either through apt-get (sudo apt-get install dssp), or you can follow the instructions on their github page to make a local installation: 
 https://github.com/cmbi/dssp.
 
-If you are having trouble installing DSSP, there is a PyTorch implementation of DSSP that you can install as a workaround:
+If DSSP fails to install, there is a PyTorch implementation of DSSP that you can install as a workaround:
 
-- ![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) `Alternative to installing dssp`
-```bash
+#### Alternative to installing DSSP
+
 pip install torch
 pip install pydssp
 pip install nomkl
