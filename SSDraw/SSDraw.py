@@ -366,7 +366,7 @@ def plot_coords(coords_all,mat,sz,CMAP):
         im.set_clip_path(patch)
         
             
-def run_dssp(dssp_exe, pdb_path, id, chain):  
+def run_dssp(dssp_exe, pdb_path, id, chain_id): 
 
     dssp_mode = "dssp"
     ss_seq = ""
@@ -389,7 +389,7 @@ def run_dssp(dssp_exe, pdb_path, id, chain):
         #res_len = len([])
         
         for chain in model:
-            if chain.get_id() == args.chain_id:
+            if chain.get_id() == chain_id:
                 resnum = len([i for i in chain.get_residues()])
                 coords = torch.zeros(resnum, 4, 3)
                 r_idx = 0
@@ -415,7 +415,7 @@ def run_dssp(dssp_exe, pdb_path, id, chain):
                     ss_seq+=dssp[key][2]
       
     return [ss_seq,aa_seq]
-
+    
 def convert2horiz(dssp_file, pdbseq):
 
     ss_seq = ""
