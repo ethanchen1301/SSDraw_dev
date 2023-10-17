@@ -29,7 +29,7 @@ def get_args():
 def main():
     
     args,parser = get_args()
-    output_file_type = ".png"
+    output_file_type = "png"
 
     ssdraw_params = {
         "FASTA": [],
@@ -65,11 +65,12 @@ def main():
             if words[0][0] == "#":
                 continue
             
-            if bool(re.search("--output_file_type", current_param)):
-                output_file_type = current_param[18:].strip()
+            if bool(re.search("--output_file_type", line)):
+                output_file_type = line.strip()[19:]
 
             if current_param != "" and read_state:
                 ssdraw_params[current_param].append(line.strip())
+
 
             
 
@@ -92,7 +93,7 @@ def main():
         name = ssdraw_params["NAME"][i]
         output = args.output+"/"+ssdraw_params["OUTPUT"][i]
 
-        ssdraw_command = "python SSDraw.py -f {:} -p {:} -n {:} -o {:} {:}".format(fasta, pdb, name, output, additional_params)
+        ssdraw_command = "python3 SSDraw.py -f {:} -p {:} -n {:} -o {:} {:}".format(fasta, pdb, name, output, additional_params)
         os.system(ssdraw_command)
         imgs.append(Image.open(output+"."+output_file_type))
         
