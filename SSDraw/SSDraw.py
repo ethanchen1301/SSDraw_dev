@@ -407,7 +407,7 @@ def run_dssp(pdb_path, id, chain_id, dssp_exe='mkdssp'):
     if dssp_mode == "dssp":
         a_key = list(dssp.keys())
         for key in a_key:
-            if key[0] == chain:
+            if key[0] == chain_id:
                 aa_seq+=dssp[key][1] 
                 if dssp[key][2] == "-":
                     ss_seq+="C"
