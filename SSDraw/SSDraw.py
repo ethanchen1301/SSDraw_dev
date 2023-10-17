@@ -366,7 +366,7 @@ def plot_coords(coords_all,mat,sz,CMAP):
         im.set_clip_path(patch)
         
             
-def run_dssp(dssp_exe, pdb_path, id, chain_id): 
+def run_dssp(pdb_path, id, chain_id, dssp_exe='mkdssp'): 
 
     dssp_mode = "dssp"
     ss_seq = ""
@@ -719,7 +719,7 @@ def initialize():
         f = convert2horiz(args.SS,pdbseq)
     else:
         # run the dssp executable
-        f = run_dssp(args.dssp_exe, args.pdb, id, chain_id) 
+        f = run_dssp(args.pdb, id, chain_id, dssp_exe=args.dssp_exe) 
 
     nlines = 1
     salign = open(args.fasta).read().splitlines() 
