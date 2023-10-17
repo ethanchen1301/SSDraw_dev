@@ -263,7 +263,7 @@ def SS_breakdown(ss):
     return strand,loop,helix, ssbreak, ss_order, ss_bounds
 
 
-def updateSS(ss,seq,alignment):
+def updateSS(ss,seq,alignment,ref_align):
 
     ss_u = ''
 
@@ -271,7 +271,10 @@ def updateSS(ss,seq,alignment):
 
     for i in range(len(alignment)):
         if alignment[i] == '-':
-            ss_u += '-'
+            if ref_align[i] == '-':
+                ss_u += '-'
+            else:
+                ss_u += 'C'
         else:
             ss_u += ss[j]
             j += 1
@@ -336,7 +339,7 @@ def SS_align(alignment,ID,seq,ss,i_start,i_end):
 
     extra_gaps = [new_aln_gaps[0]-a_seq_gaps[0], new_aln_gaps[1]-a_seq_gaps[1]]
 
-    SS_updated = updateSS(ss,seq,a[0][0])
+    SS_updated = updateSS(ss,seq,a[0][0],a[0][1])
 
     SS_updated_new = gap_sequence(SS_updated, extra_gaps)
     a_new = gap_sequence(a[0][1], extra_gaps)
@@ -572,7 +575,10 @@ def parse_color(args,seq_wgaps,pdbseq,bfactors,msa,extra_gaps):
             sys.exit()
         for i in range(len(seq_wgaps)):
             if seq_wgaps[i] == "-" or bvals_align[0][1][i] == "-":
-                bvalsf.append(min(bvals))
+                if j >= len(bvals):
+                    bvalsf.append(bvals[j-1])
+                else:
+                    bvalsf.append(bvals[j])
             elif seq_wgaps[i] == bvals_align[0][1][i]:
                 bvalsf.append(bvals[j])
                 j+=1
