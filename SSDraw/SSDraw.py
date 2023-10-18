@@ -24,6 +24,58 @@ import warnings, textwrap
 from Bio import BiopythonWarning
 from Bio.PDB.PDBExceptions import PDBConstructionWarning
 
+def read_r4s(inputfile):
+    # algorithm to convert raw scores to grades is taken from consurf:
+    # https://github.com/Rostlab/ConSurf
+    seq = ""
+    scores = []
+
+    pattern = r"^\s*?\d+\s+(\w)\s+(\S+)\s+\[\s*\S+,\s*\S+\]\s+\S+\s+\d+\/\d+"
+    with open(inputfile) as READ:
+        for line in READ:
+            line = line.strip()
+            if re.match(pattern, line):
+                match = re.match(pattern, line)
+                seq+=match.group(1)
+                scores.append(eval(match.group(2)))
+
+    max_cons = min(scores)
+
+    # 9 steps from -|max_cons| to |max_cons|, midpoint is 0
+    ConsGradeUnity = max_cons / 4.5 * -1
+    if max_cons >= 0:
+        ConsGradeUnity = max_cons
+
+    grades = []
+    for score in scores:
+        grades.append(max(1, 9-int((score-max_cons)/ConsGradeUnity)))
+
+    return seq, grades
+
+def read_consurf_grad(inputfile):
+
+    grades = []
+    seq = ""
+    pattern = r"^\s*?\d+\s+(\w)\s+\S+\s+\S+\s+(\d)\S*\s+-?\d+.\d+,\s+-?\d+.\d+\s+\d,\d\s+\d+\/\d+\s+\S+"
+    with open(inputfile, "r") as f:
+        for line in f:
+            if re.match(pattern, line):
+                match = re.match(pattern,line)
+                seq += match.group(1)
+                grades.append(match.group(2))
+            
+    return seq,grades
+
+def check_consurf_file(file):
+    consurf_pattern = r"^\s*?\d+\s+(\w)\s+\S+\s+\S+\s+(\d)\S*\s+-?\d+.\d+,\s+-?\d+.\d+\s+\d,\d\s+\d+\/\d+\s+\S+"
+    r4s_pattern = r"^\s*?\d+\s+(\w)\s+(\S+)\s+\[\s*\S+,\s*\S+\]\s+\S+\s+\d+\/\d+"
+    with open(file, "r") as f:
+        for line in f:
+            if re.match(consurf_pattern, line):
+                return "consurf"
+            if re.match(r4s_pattern, line):
+                return "r4s"
+
 def gap_sequence(seq, extra_gaps):
     # seq can be a list or a string, anything that can be indexed
     # extra gaps is a list of length two [x,y],
@@ -520,24 +572,55 @@ def parse_color(args,seq_wgaps,pdbseq,bfactors,msa,extra_gaps):
 
         CMAP = ListedColormap(mview_color_map)
 
+    elif args.consurf:
+        # read in a rate4site output file or consurf score file
+        # if rate4site output file, convert raw scores to 1-9 scores
+        consurf_color_map = ["#10C8D1", "#8CFFFF", "#D7FFFF", "#EAFFFF", "#FFFFFF",
+        "#FCEDF4", "#FAC9DE", "#F07DAB", "#A02560"]
+        
+        scoring_seq = ""
+        bvals_tmp = []
+        consurf_mode = check_consurf_file(args.consurf)
+        if consurf_mode == "consurf":
+            scoring_seq,bvals_tmp = read_consurf_grad(args.consurf)
+        elif consurf_mode == "r4s":
+            scoring_seq,bvals_tmp = read_r4s(args.consurf)
+
+        print(bvals_tmp)
+
+        # remove colors of residues not in sequence
+        for i in reversed(range(1,10)): 
+            if i not in bvals_tmp:
+                consurf_color_map.pop(i-1)
+                for j in range(len(bvals_tmp)):
+                    if bvals_tmp[j] > i:
+                        bvals_tmp[j] -= 1
+        print(consurf_color_map)
+
+        CMAP = ListedColormap(consurf_color_map)
+
+        score_align = pairwise2.align.localxs(pdbseq,scoring_seq,-1,-0.5)
+
+        j = 0
+        for i in range(len(score_align[0][1])):
+            if score_align[0][0][i] != "-":
+                if score_align[0][1][i] != "-":
+                    bvals.append(bvals_tmp[j])
+                    j+=1
+                else:
+                    bvals.append(min(bvals_tmp))
+
     elif args.scoring_file: # use custom scoring by residue
+        
         # read in scoring file
         bvals_tmp = []
         scoring_seq = ""
         with open(args.scoring_file, "r") as g:
             lines = g.readlines()
 
-        if lines[0] == '\t Amino Acid Conservation Scores\n': # read in consurf file
-            for line in lines:
-                if len(line.split()) > 0:
-                    if line.split()[0].isdigit():
-                        scoring_seq += line.split()[1]
-                        bvals_tmp.append(float(line.split()[4]))
-
-        else: # read in custom scoring file
-            for line in lines:
-                scoring_seq += line.split()[0]
-                bvals_tmp.append(float(line.split()[1]))
+        for line in lines:
+            scoring_seq += line.split()[0]
+            bvals_tmp.append(float(line.split()[1]))
 
         score_align = pairwise2.align.localxs(pdbseq,scoring_seq,-1,-0.5)
 
@@ -700,6 +783,7 @@ def get_args():
     parser.add_argument("--start", default=0, type=int)
     parser.add_argument("--end", default=0,type=int)
     parser.add_argument("--dssp_exe", default='mkdssp', help='The path to your dssp executable. Default: mkdssp')
+    parser.add_argument("--consurf", default="", help="consurf or rate4site file to color image with. If rate4site file is given, SSDraw will convert raw scores to grades.")
 
     args = parser.parse_args()
 
